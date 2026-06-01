@@ -6,7 +6,7 @@ Place historical events in chronological order on a world timeline.
 
 This repository is the **canonical source** for the game. Edit here; pushes to `main` update the live site via GitHub Pages (`/` root).
 
-A copy still lives in the [EDPS portfolio repo](https://github.com/kaegbert/EDPS_kevin_egbert) under `neolithic-timeline/` (with a redirect to this URL on GitHub Pages).
+The [EDPS portfolio](https://github.com/kaegbert/EDPS_kevin_egbert) links here via a small `neolithia/` redirect page.
 
 Static HTML/CSS/JS — no build step required.
 
