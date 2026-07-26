@@ -1251,49 +1251,54 @@
 
   const EVENTS = cards;
 
-  /** Large geographic areas for map icons on cards */
+  /** Large geographic areas for illustrated icons on cards */
+  const GEO_ICON_BASE = "assets/geo-icons/";
+  /** Bump when replacing icon art so browsers skip stale cached PNGs */
+  const GEO_ICON_VERSION = "3";
   const GEO_META = {
     asia: {
       label: "Asia",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M4 8c2-3 6-5 10-4 3 1 6 4 7 8 1 4-1 8-4 10H8c-3-2-5-6-4-10 1-2 2-3 0-4z"/></svg>',
+      icon: GEO_ICON_BASE + "asia.png",
     },
     europe: {
       label: "Europe",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M5 6c2-2 5-2 7 0 2 2 3 5 2 8l-2 6H6l-2-6c-1-3 0-6 1-8z"/></svg>',
+      icon: GEO_ICON_BASE + "europe.png",
     },
     africa: {
       label: "Africa",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M11 3c3 0 5 3 5 7 0 2-1 4-2 6l-1 5H9l-1-5c-1-2-2-4-2-6 0-4 2-7 5-7z"/></svg>',
+      icon: GEO_ICON_BASE + "africa.png",
     },
     americas: {
       label: "Americas",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M7 3c2 0 3 2 3 5v3c0 3-1 6-2 8 1-1 2-2 3-2 1 0 2 1 2 3v2c0 2-1 4-3 4s-3-2-3-4v-1c-2 0-3-2-3-4 0-5 2-10 3-14z"/></svg>',
+      icon: GEO_ICON_BASE + "americas.png",
     },
     oceania: {
       label: "Oceania",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><circle cx="8" cy="16" r="3"/><circle cx="16" cy="14" r="2.5"/><circle cx="13" cy="19" r="2"/></svg>',
+      icon: GEO_ICON_BASE + "oceania.png",
     },
     "middle-east": {
       label: "Middle East",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M6 10c2-4 6-6 10-4 2 1 3 3 3 6 0 3-2 5-5 6l-4 2c-2-1-3-3-3-6 0-2 0-3-1-4z"/></svg>',
+      icon: GEO_ICON_BASE + "middle-east.png",
     },
     eurasia: {
       label: "Eurasia",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M3 11c3-4 8-6 13-5 4 1 7 4 7 8s-3 7-7 8H8c-4-1-7-4-7-7 0-2 1-3 2-4z"/></svg>',
+      icon: GEO_ICON_BASE + "eurasia.png",
     },
     beringia: {
       label: "Beringia (Asia–Americas)",
-      svg:
-        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M3 12c0-2 2-4 4-4h2v8H7c-2 0-4-2-4-4zm14 0c0-2-2-4-4-4h-2v8h2c2 0 4-2 4-4z"/><path d="M10 10h4v4h-4z" opacity=".35"/></svg>',
+      icon: GEO_ICON_BASE + "beringia.png",
     },
   };
+
+  function geoIconHtml(meta) {
+    return (
+      '<img class="card-geo-img" src="' +
+      escapeHtml(meta.icon) +
+      "?v=" +
+      GEO_ICON_VERSION +
+      '" alt="" width="48" height="48" draggable="false" />'
+    );
+  }
 
   /** Display order for the welcome-screen geographic key */
   const GEO_LEGEND_ORDER = [
@@ -1439,7 +1444,7 @@
       const icon = document.createElement("span");
       icon.className = "card-geo card-geo--" + geo;
       icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML = meta.svg;
+      icon.innerHTML = geoIconHtml(meta);
 
       const text = document.createElement("span");
       text.className = "geo-picker-label";
@@ -1616,7 +1621,7 @@
       '" role="img" aria-label="' +
       escapeHtml(meta.label) +
       '">' +
-      meta.svg +
+      geoIconHtml(meta) +
       "</span>" +
       '<p class="card-region">' +
       escapeHtml(event.region) +
@@ -1629,7 +1634,7 @@
     const geo = resolveGeo(event);
     const meta = GEO_META[geo] || GEO_META.eurasia;
     container.className = "card-geo card-geo--" + geo;
-    container.innerHTML = meta.svg;
+    container.innerHTML = geoIconHtml(meta);
     container.setAttribute("aria-label", meta.label);
     container.removeAttribute("aria-hidden");
   }
@@ -2225,7 +2230,7 @@
       '" role="img" aria-label="' +
       escapeHtml(meta.label) +
       '">' +
-      meta.svg +
+      geoIconHtml(meta) +
       "</span>" +
       '<p class="card-region card-region--compact">' +
       escapeHtml(event.region) +
@@ -2254,7 +2259,7 @@
       '<span class="card-geo card-geo--' +
       geo +
       '" aria-hidden="true">' +
-      meta.svg +
+      geoIconHtml(meta) +
       "</span>" +
       '<span class="card-tooltip-region">' +
       escapeHtml(event.region) +

@@ -536,14 +536,9 @@ body.is-dragging-mystery {
 }
 
 .card-header--compact .card-geo {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.7rem;
+  height: 1.7rem;
   flex-shrink: 0;
-}
-
-.card-header--compact .card-geo svg {
-  width: 0.8rem;
-  height: 0.8rem;
 }
 
 .card-region--compact {
@@ -828,58 +823,22 @@ body.is-dragging-mystery {
 
 .card-geo {
   flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
-.card-geo svg {
-  width: 1.25rem;
-  height: 1.25rem;
+.card-geo-img {
+  width: 100%;
+  height: 100%;
   display: block;
-}
-
-.card-geo--asia {
-  color: #b45309;
-  background: rgba(180, 83, 9, 0.12);
-}
-
-.card-geo--europe {
-  color: #1d4ed8;
-  background: rgba(29, 78, 216, 0.1);
-}
-
-.card-geo--africa {
-  color: #b91c1c;
-  background: rgba(185, 28, 28, 0.1);
-}
-
-.card-geo--americas {
-  color: #15803d;
-  background: rgba(21, 128, 61, 0.1);
-}
-
-.card-geo--oceania {
-  color: #0e7490;
-  background: rgba(14, 116, 144, 0.1);
-}
-
-.card-geo--middle-east {
-  color: #a16207;
-  background: rgba(161, 98, 7, 0.12);
-}
-
-.card-geo--eurasia {
-  color: #6d28d9;
-  background: rgba(109, 40, 217, 0.1);
-}
-
-.card-geo--beringia {
-  color: #475569;
-  background: rgba(71, 85, 105, 0.12);
+  object-fit: cover;
 }
 
 .card-region {
@@ -1777,14 +1736,9 @@ body.is-dragging-mystery {
 }
 
 .geo-picker-item .card-geo {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   pointer-events: none;
-}
-
-.geo-picker-item .card-geo svg {
-  width: 1rem;
-  height: 1rem;
 }
 
 .geo-picker-label {
