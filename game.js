@@ -1254,7 +1254,7 @@
   /** Large geographic areas for illustrated icons on cards */
   const GEO_ICON_BASE = "assets/geo-icons/";
   /** Bump when replacing icon art so browsers skip stale cached PNGs */
-  const GEO_ICON_VERSION = "3";
+  const GEO_ICON_VERSION = "5";
   const GEO_META = {
     asia: {
       label: "Asia",
@@ -1310,6 +1310,18 @@
     "africa",
     "americas",
     "oceania",
+  ];
+
+  /** Matches assets/geo-icons/assets.png (2×4: Asia…Oceania / Middle East…Americas) */
+  const GEO_BOARD_ORDER = [
+    "asia",
+    "beringia",
+    "africa",
+    "oceania",
+    "middle-east",
+    "eurasia",
+    "europe",
+    "americas",
   ];
 
   function countEventsByGeo() {
@@ -1399,6 +1411,9 @@
 
     const counts = countEventsByGeo();
 
+    const header = document.createElement("div");
+    header.className = "geo-picker-header";
+
     const title = document.createElement("h3");
     title.className = "geo-picker-title";
     title.textContent = "Regions to include";
@@ -1424,16 +1439,30 @@
 
     actions.appendChild(btnAll);
     actions.appendChild(btnNone);
+    header.appendChild(title);
+    header.appendChild(actions);
 
     const list = document.createElement("ul");
-    list.className = "geo-picker-list";
+    list.className = "geo-picker-grid";
 
-    GEO_LEGEND_ORDER.forEach(function (geo) {
+    GEO_BOARD_ORDER.forEach(function (geo) {
       const meta = GEO_META[geo];
       if (!meta) return;
 
+      const item = document.createElement("li");
+      item.className = "geo-picker-cell";
+
       const row = document.createElement("label");
       row.className = "geo-picker-item";
+      row.title = meta.label;
+
+      const icon = document.createElement("span");
+      icon.className = "geo-picker-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = geoIconHtml(meta);
+
+      const metaRow = document.createElement("span");
+      metaRow.className = "geo-picker-meta";
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -1441,29 +1470,24 @@
       checkbox.dataset.geo = geo;
       checkbox.addEventListener("change", updateRegionPickerStatus);
 
-      const icon = document.createElement("span");
-      icon.className = "card-geo card-geo--" + geo;
-      icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML = geoIconHtml(meta);
-
+      const boardLabel = geo === "beringia" ? "Beringia" : meta.label;
       const text = document.createElement("span");
       text.className = "geo-picker-label";
-      text.appendChild(document.createTextNode(meta.label + " "));
+      text.appendChild(document.createTextNode(boardLabel + " "));
       const countSpan = document.createElement("span");
       countSpan.className = "geo-picker-count";
       countSpan.textContent = "(" + counts[geo] + ")";
       text.appendChild(countSpan);
 
-      row.appendChild(checkbox);
+      metaRow.appendChild(checkbox);
+      metaRow.appendChild(text);
       row.appendChild(icon);
-      row.appendChild(text);
-
-      const item = document.createElement("li");
+      row.appendChild(metaRow);
       item.appendChild(row);
       list.appendChild(item);
     });
 
-    container.replaceChildren(title, actions, list);
+    container.replaceChildren(header, list);
     updateRegionPickerStatus();
   }
 
@@ -1976,26 +2000,36 @@
   function applyTimelineScrollPadding() {
     if (!el.timelineScroll || !el.timelineTrack || !el.timeline) return false;
 
-    el.timelineTrack.style.paddingLeft = "0";
-    el.timelineTrack.style.paddingRight = "0";
-    el.timelineTrack.classList.remove("timeline-track--fits");
-    void el.timeline.offsetWidth;
-
     const scrollEl = el.timelineScroll;
-    const contentWidth = el.timeline.scrollWidth;
     const clientWidth = scrollEl.clientWidth;
-
     if (clientWidth < 1) return false;
+
+    // Measure timeline content directly — do not zero track padding first
+    // (that clamps scrollLeft toward 0 and causes a visible jump).
+    const contentWidth = el.timeline.scrollWidth;
+    const prevPadLeft = parseFloat(el.timelineTrack.style.paddingLeft) || 0;
+    const prevScrollLeft = scrollEl.scrollLeft;
+    const contentScroll = prevScrollLeft - prevPadLeft;
 
     if (contentWidth <= clientWidth + 1) {
       el.timelineTrack.classList.add("timeline-track--fits");
+      if (prevPadLeft !== 0) {
+        el.timelineTrack.style.paddingLeft = "0";
+        el.timelineTrack.style.paddingRight = "0";
+      }
       scrollEl.scrollLeft = 0;
       return true;
     }
 
     const pad = Math.ceil(clientWidth / 2);
-    el.timelineTrack.style.paddingLeft = pad + "px";
-    el.timelineTrack.style.paddingRight = pad + "px";
+    el.timelineTrack.classList.remove("timeline-track--fits");
+
+    if (prevPadLeft !== pad) {
+      el.timelineTrack.style.paddingLeft = pad + "px";
+      el.timelineTrack.style.paddingRight = pad + "px";
+      const maxScroll = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
+      scrollEl.scrollLeft = Math.min(maxScroll, Math.max(0, contentScroll + pad));
+    }
     return false;
   }
 
@@ -2094,7 +2128,6 @@
   function scrollTimelineToRoundContext() {
     if (!el.timelineScroll || !el.timeline) return;
 
-    el.timelineScroll.scrollLeft = 0;
     runAfterTimelineLayout(function () {
       centerAnchorUnderMap(false);
     });
@@ -3032,6 +3065,14 @@
 
     hideCardTooltip();
     hideMapTooltip();
+
+    const scrollEl = el.timelineScroll;
+    const prevPadLeft =
+      el.timelineTrack && scrollEl
+        ? parseFloat(el.timelineTrack.style.paddingLeft) || 0
+        : 0;
+    const savedContentScroll = scrollEl ? scrollEl.scrollLeft - prevPadLeft : 0;
+
     el.timeline.innerHTML = "";
     updateWelcomeMap();
     const centerRow = placing || phase === PHASE.REVEAL;
@@ -3067,6 +3108,17 @@
     });
     updateTimelineRange();
     syncTimelineScrollLayout();
+
+    // Keep the same cards under the viewport across rebuild; centering
+    // helpers can then move from here instead of from scrollLeft 0.
+    if (scrollEl && el.timelineTrack) {
+      const pad = parseFloat(el.timelineTrack.style.paddingLeft) || 0;
+      const maxScroll = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
+      scrollEl.scrollLeft = Math.min(
+        maxScroll,
+        Math.max(0, savedContentScroll + pad)
+      );
+    }
   }
 
   function escapeHtml(text) {
